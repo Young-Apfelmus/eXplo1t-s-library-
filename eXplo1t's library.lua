@@ -1,9 +1,3 @@
-﻿--=============================================================================--
--- TWISTED PREMIUM UI FRAMEWORK
--- A high-quality, modern, and highly customizable UI Library for Roblox.
--- Contains over 1500+ lines of extensive UI management, rendering, and logic.
---=============================================================================--
-
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -1211,6 +1205,8 @@ function UI:CreateTab(name, iconId)
     return tab
 end
 
-r e t u r n  
- U I  
+r e t u r n 
+ 
+ U I 
+ 
  
