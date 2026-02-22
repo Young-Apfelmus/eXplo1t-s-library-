@@ -643,6 +643,74 @@ function UI:CreateTab(name, iconId)
         end)
     end
     
+    function tab:CreateTextbox(options)
+        options = options or {}
+        local tName = options.Name or "Textbox"
+        local flag = options.Flag or tName
+        local placeholder = options.Placeholder or ""
+        local sval = options.CurrentValue or ""
+        local cb = options.Callback or function() end
+        local clearOnFocus = options.ClearOnFocus or false
+        
+        local frm = Utility:Create("Frame", {
+            Parent = tab.Content,
+            Size = UDim2.new(1, 0, 0, 45),
+            BackgroundColor3 = Theme.ElementBg
+        })
+        Utility:Create("UICorner", {Parent = frm, CornerRadius = UDim.new(0, 6)})
+        Utility:Create("UIStroke", {Parent = frm, Color = Theme.Stroke})
+        
+        Utility:Create("TextLabel", {
+            Parent = frm,
+            Size = UDim2.new(0.5, 0, 1, 0),
+            Position = UDim2.new(0, 15),
+            BackgroundTransparency = 1,
+            Text = tName,
+            TextColor3 = Theme.Text,
+            TextSize = 14,
+            Font = Enum.Font.Gotham,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
+        
+        local BoxBg = Utility:Create("Frame", {
+            Parent = frm,
+            Size = UDim2.new(0.5, -25, 0, 25),
+            Position = UDim2.new(0.5, 10, 0.5, -12.5),
+            BackgroundColor3 = Theme.Background
+        })
+        Utility:Create("UICorner", {Parent = BoxBg, CornerRadius = UDim.new(0, 4)})
+        Utility:Create("UIStroke", {Parent = BoxBg, Color = Theme.Stroke})
+        
+        local Box = Utility:Create("TextBox", {
+            Parent = BoxBg,
+            Size = UDim2.new(1, -10, 1, 0),
+            Position = UDim2.new(0, 5),
+            BackgroundTransparency = 1,
+            Text = sval,
+            PlaceholderText = placeholder,
+            TextColor3 = Theme.Text,
+            PlaceholderColor3 = Theme.TextDark,
+            TextSize = 13,
+            Font = Enum.Font.Gotham,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ClearTextOnFocus = clearOnFocus,
+            ClipsDescendants = true
+        })
+        
+        Box.FocusLost:Connect(function()
+            local currentText = Box.Text
+            tab.Window.Flags[flag] = currentText
+            cb(currentText)
+        end)
+        
+        tab.Window.Flags[flag] = sval
+        tab.Window.Setters[flag] = function(newVal, fromConfig)
+            sval = newVal
+            Box.Text = tostring(sval)
+            cb(sval)
+        end
+    end
+    
     function tab:CreateToggle(options)
         options = options or {}
         local tName = options.Name or "Toggle"
