@@ -705,7 +705,7 @@ function UI:CreateTab(name, iconId)
             state = newVal
             Utility:Tween(Indicator, {BackgroundColor3 = state and Theme.Accent or Theme.Background})
             Utility:Tween(Circle, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.5, Enum.EasingStyle.Exponential)
-            if not fromConfig then cb(state) end
+            cb(state)
         end
         
         if state then cb(state) end
@@ -840,7 +840,7 @@ function UI:CreateTab(name, iconId)
             local pct = (val - min) / (max - min)
             Utility:Tween(SldFill, {Size = UDim2.new(pct, 0, 1, 0)}, 0.2)
             ValBox.Text = tostring(val)
-            if not fromConfig then cb(val) end
+            cb(val)
         end
     end
     
@@ -970,6 +970,13 @@ function UI:CreateTab(name, iconId)
                 Utility:Tween(dropStroke, {Transparency = 1})
             end
         end)
+        
+        tab.Window.Flags[flag] = val
+        tab.Window.Setters[flag] = function(newVal, fromConfig)
+            val = newVal
+            btn.TextLabel.Text = dName .. " - " .. val
+            cb({val})
+        end
         
         return selfDrop
     end
@@ -1249,7 +1256,7 @@ function UI:CreateTab(name, iconId)
             Display.BackgroundColor3 = newVal
             if SatGrad then SatGrad.Color = ColorSequence.new(Color3.new(1,1,1), Color3.fromHSV(ColorH, 1, ColorV)) end
             if ValGrad then ValGrad.Color = ColorSequence.new(Color3.new(0,0,0), Color3.fromHSV(ColorH, ColorS, 1)) end
-            if not fromConfig then cb(newVal) end
+            cb(newVal)
         end
         
         return btn
