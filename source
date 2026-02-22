@@ -481,6 +481,7 @@ end
 
 function UI:CreateTab(name, iconId)
     local tab = {}
+    tab.Window = self
     
     -- Tab Button
     tab.Button = Utility:Create("TextButton", {
@@ -693,14 +694,14 @@ function UI:CreateTab(name, iconId)
         
         btn.MouseButton1Click:Connect(function()
             state = not state
-            self.Flags[flag] = state
+            tab.Window.Flags[flag] = state
             Utility:Tween(Indicator, {BackgroundColor3 = state and Theme.Accent or Theme.Background})
             Utility:Tween(Circle, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.5, Enum.EasingStyle.Exponential)
             cb(state)
         end)
         
-        self.Flags[flag] = state
-        self.Setters[flag] = function(newVal, fromConfig)
+        tab.Window.Flags[flag] = state
+        tab.Window.Setters[flag] = function(newVal, fromConfig)
             state = newVal
             Utility:Tween(Indicator, {BackgroundColor3 = state and Theme.Accent or Theme.Background})
             Utility:Tween(Circle, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.5, Enum.EasingStyle.Exponential)
@@ -796,7 +797,7 @@ function UI:CreateTab(name, iconId)
             local finalPct = (val - min) / (max - min)
             Utility:Tween(SldFill, {Size = UDim2.new(finalPct, 0, 1, 0)}, 0.1)
             ValBox.Text = tostring(val)
-            self.Flags[flag] = val
+            tab.Window.Flags[flag] = val
             cb(val)
         end
         
@@ -826,15 +827,15 @@ function UI:CreateTab(name, iconId)
                 local pct = (val - min) / (max - min)
                 Utility:Tween(SldFill, {Size = UDim2.new(pct, 0, 1, 0)}, 0.2)
                 ValBox.Text = tostring(val)
-                self.Flags[flag] = val
+                tab.Window.Flags[flag] = val
                 cb(val)
             else
                 ValBox.Text = tostring(val)
             end
         end)
         
-        self.Flags[flag] = val
-        self.Setters[flag] = function(newVal, fromConfig)
+        tab.Window.Flags[flag] = val
+        tab.Window.Setters[flag] = function(newVal, fromConfig)
             val = math.clamp(newVal, min, max)
             local pct = (val - min) / (max - min)
             Utility:Tween(SldFill, {Size = UDim2.new(pct, 0, 1, 0)}, 0.2)
@@ -939,7 +940,7 @@ function UI:CreateTab(name, iconId)
                 obtn.MouseButton1Click:Connect(function()
                     val = o
                     btn.TextLabel.Text = dName .. " - " .. val
-                    self.Flags[flag] = val
+                    tab.Window.Flags[flag] = val
                     cb({val})
                     open = false
                     Utility:Tween(Icon, {Rotation = 0})
@@ -1028,7 +1029,7 @@ function UI:CreateTab(name, iconId)
                 binding = false
                 key = input.KeyCode
                 KBtn.Text = key.Name
-                self.Flags[flag] = key
+                tab.Window.Flags[flag] = key
                 Utility:Tween(KStroke, {Color = Theme.Stroke})
             elseif not proc and input.KeyCode == key and not binding then
                 if hold then
@@ -1049,8 +1050,8 @@ function UI:CreateTab(name, iconId)
             end
         end)
         
-        self.Flags[flag] = key
-        self.Setters[flag] = function(newVal, fromConfig)
+        tab.Window.Flags[flag] = key
+        tab.Window.Setters[flag] = function(newVal, fromConfig)
             key = newVal
             KBtn.Text = key.Name
         end
@@ -1192,7 +1193,7 @@ function UI:CreateTab(name, iconId)
             Display.BackgroundColor3 = c
             SatGrad.Color = ColorSequence.new(Color3.new(1,1,1), Color3.fromHSV(ColorH, 1, ColorV))
             ValGrad.Color = ColorSequence.new(Color3.new(0,0,0), Color3.fromHSV(ColorH, ColorS, 1))
-            self.Flags[flag] = c
+            tab.Window.Flags[flag] = c
             cb(c)
         end
         
@@ -1242,8 +1243,8 @@ function UI:CreateTab(name, iconId)
         btn.MouseEnter:Connect(function() Utility:Tween(Stroke, {Color = Theme.Accent}) end)
         btn.MouseLeave:Connect(function() Utility:Tween(Stroke, {Color = Theme.Stroke}) end)
         
-        self.Flags[flag] = default
-        self.Setters[flag] = function(newVal, fromConfig)
+        tab.Window.Flags[flag] = default
+        tab.Window.Setters[flag] = function(newVal, fromConfig)
             ColorH, ColorS, ColorV = Color3.toHSV(newVal)
             Display.BackgroundColor3 = newVal
             if SatGrad then SatGrad.Color = ColorSequence.new(Color3.new(1,1,1), Color3.fromHSV(ColorH, 1, ColorV)) end
