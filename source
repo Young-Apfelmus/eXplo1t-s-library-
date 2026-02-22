@@ -555,15 +555,18 @@ function UI:CreateTab(name, iconId)
         Text = name,
         TextColor3 = Theme.TextDark,
         TextSize = 13,
-        Font = Enum.Font.GothamMedium
+        Font = Enum.Font.GothamMedium,
+        AutoLocalize = false
     })
     Utility:Create("UICorner", {Parent = tab.Button, CornerRadius = UDim.new(0, 6)})
     
+    local paddingLeft = 0
     if iconId then
+        paddingLeft = 32
         tab.Button.TextXAlignment = Enum.TextXAlignment.Left
         Utility:Create("UIPadding", {
             Parent = tab.Button,
-            PaddingLeft = UDim.new(0, 32)
+            PaddingLeft = UDim.new(0, paddingLeft)
         })
         tab.Icon = Utility:Create("ImageLabel", {
             Parent = tab.Button,
@@ -579,7 +582,8 @@ function UI:CreateTab(name, iconId)
     local Indicator = Utility:Create("Frame", {
         Parent = tab.Button,
         Size = UDim2.new(0, 3, 0, 0),
-        Position = UDim2.new(0, 5, 0.5, 0),
+        -- If padding exists, we offset back to the left edge to simulate absolute position
+        Position = UDim2.new(0, 5 - paddingLeft, 0.5, 0),
         BackgroundColor3 = Theme.Accent,
         BorderSizePixel = 0,
         AnchorPoint = Vector2.new(0, 0.5)
