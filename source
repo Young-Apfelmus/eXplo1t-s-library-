@@ -108,6 +108,15 @@ function UI.new(options)
     self.Tabs = {}
     self.CurrentTab = nil
     
+    self.Flags = {}
+    self.Setters = {}
+
+    pcall(function()
+        if not isfolder("eXplo1t'sCONFIG") then
+            makefolder("eXplo1t'sCONFIG")
+        end
+    end)
+    
     -- Main GUI
     self.ScreenGui = Utility:Create("ScreenGui", {
         Name = HttpService:GenerateGUID(false),
@@ -636,6 +645,7 @@ function UI:CreateTab(name, iconId)
     function tab:CreateToggle(options)
         options = options or {}
         local tName = options.Name or "Toggle"
+        local flag = options.Flag or tName
         local state = options.CurrentValue or false
         local cb = options.Callback or function() end
         
@@ -683,10 +693,19 @@ function UI:CreateTab(name, iconId)
         
         btn.MouseButton1Click:Connect(function()
             state = not state
+            self.Flags[flag] = state
             Utility:Tween(Indicator, {BackgroundColor3 = state and Theme.Accent or Theme.Background})
             Utility:Tween(Circle, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.5, Enum.EasingStyle.Exponential)
             cb(state)
         end)
+        
+        self.Flags[flag] = state
+        self.Setters[flag] = function(newVal, fromConfig)
+            state = newVal
+            Utility:Tween(Indicator, {BackgroundColor3 = state and Theme.Accent or Theme.Background})
+            Utility:Tween(Circle, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.5, Enum.EasingStyle.Exponential)
+            if not fromConfig then cb(state) end
+        end
         
         if state then cb(state) end
     end
@@ -694,6 +713,7 @@ function UI:CreateTab(name, iconId)
     function tab:CreateSlider(options)
         options = options or {}
         local sName = options.Name or "Slider"
+        local flag = options.Flag or sName
         local min = options.Range and options.Range[1] or 0
         local max = options.Range and options.Range[2] or 100
         local val = options.CurrentValue or min
@@ -776,6 +796,7 @@ function UI:CreateTab(name, iconId)
             local finalPct = (val - min) / (max - min)
             Utility:Tween(SldFill, {Size = UDim2.new(finalPct, 0, 1, 0)}, 0.1)
             ValBox.Text = tostring(val)
+            self.Flags[flag] = val
             cb(val)
         end
         
@@ -805,16 +826,27 @@ function UI:CreateTab(name, iconId)
                 local pct = (val - min) / (max - min)
                 Utility:Tween(SldFill, {Size = UDim2.new(pct, 0, 1, 0)}, 0.2)
                 ValBox.Text = tostring(val)
+                self.Flags[flag] = val
                 cb(val)
             else
                 ValBox.Text = tostring(val)
             end
         end)
+        
+        self.Flags[flag] = val
+        self.Setters[flag] = function(newVal, fromConfig)
+            val = math.clamp(newVal, min, max)
+            local pct = (val - min) / (max - min)
+            Utility:Tween(SldFill, {Size = UDim2.new(pct, 0, 1, 0)}, 0.2)
+            ValBox.Text = tostring(val)
+            if not fromConfig then cb(val) end
+        end
     end
     
     function tab:CreateDropdown(options)
         options = options or {}
         local dName = options.Name or "Dropdown"
+        local flag = options.Flag or dName
         local opts = options.Options or {}
         local val = options.CurrentOption or opts[1] or ""
         local cb = options.Callback or function() end
@@ -907,6 +939,7 @@ function UI:CreateTab(name, iconId)
                 obtn.MouseButton1Click:Connect(function()
                     val = o
                     btn.TextLabel.Text = dName .. " - " .. val
+                    self.Flags[flag] = val
                     cb({val})
                     open = false
                     Utility:Tween(Icon, {Rotation = 0})
@@ -943,6 +976,7 @@ function UI:CreateTab(name, iconId)
     function tab:AddBind(options)
         options = options or {}
         local kName = options.Name or "Bind"
+        local flag = options.Flag or kName
         local key = options.Default or Enum.KeyCode.E
         local hold = options.Hold or false
         local cb = options.Callback or function() end
@@ -994,6 +1028,7 @@ function UI:CreateTab(name, iconId)
                 binding = false
                 key = input.KeyCode
                 KBtn.Text = key.Name
+                self.Flags[flag] = key
                 Utility:Tween(KStroke, {Color = Theme.Stroke})
             elseif not proc and input.KeyCode == key and not binding then
                 if hold then
@@ -1013,11 +1048,18 @@ function UI:CreateTab(name, iconId)
                 end
             end
         end)
+        
+        self.Flags[flag] = key
+        self.Setters[flag] = function(newVal, fromConfig)
+            key = newVal
+            KBtn.Text = key.Name
+        end
     end
     
     function tab:AddColorpicker(options)
         options = options or {}
         local cName = options.Name or "Colorpicker"
+        local flag = options.Flag or cName
         local default = options.Default or Color3.fromRGB(255, 255, 255)
         local cb = options.Callback or function() end
         local open = false
@@ -1150,6 +1192,7 @@ function UI:CreateTab(name, iconId)
             Display.BackgroundColor3 = c
             SatGrad.Color = ColorSequence.new(Color3.new(1,1,1), Color3.fromHSV(ColorH, 1, ColorV))
             ValGrad.Color = ColorSequence.new(Color3.new(0,0,0), Color3.fromHSV(ColorH, ColorS, 1))
+            self.Flags[flag] = c
             cb(c)
         end
         
@@ -1199,12 +1242,73 @@ function UI:CreateTab(name, iconId)
         btn.MouseEnter:Connect(function() Utility:Tween(Stroke, {Color = Theme.Accent}) end)
         btn.MouseLeave:Connect(function() Utility:Tween(Stroke, {Color = Theme.Stroke}) end)
         
+        self.Flags[flag] = default
+        self.Setters[flag] = function(newVal, fromConfig)
+            ColorH, ColorS, ColorV = Color3.toHSV(newVal)
+            Display.BackgroundColor3 = newVal
+            if SatGrad then SatGrad.Color = ColorSequence.new(Color3.new(1,1,1), Color3.fromHSV(ColorH, 1, ColorV)) end
+            if ValGrad then ValGrad.Color = ColorSequence.new(Color3.new(0,0,0), Color3.fromHSV(ColorH, ColorS, 1)) end
+            if not fromConfig then cb(newVal) end
+        end
+        
         return btn
     end
     
     return tab
 end
 
-return
+function UI:SaveConfig(name)
+    if not name then name = "default" end
+    local path = "eXplo1t'sCONFIG/" .. name .. ".json"
+    local saveTable = {}
+    for k, v in pairs(self.Flags) do
+        if typeof(v) == "Color3" then
+            saveTable[k] = {Type = "Color3", R = v.R, G = v.G, B = v.B}
+        elseif typeof(v) == "EnumItem" then
+            saveTable[k] = {Type = "EnumItem", Enum = tostring(v)}
+        else
+            saveTable[k] = v
+        end
+    end
+    pcall(function()
+        writefile(path, HttpService:JSONEncode(saveTable))
+        self:Notify({Title = "Config Saved", Text = "Saved Configuration: " .. name, Duration = 3, Type = "Success"})
+    end)
+end
 
-UI
+function UI:LoadConfig(name)
+    if not name then name = "default" end
+    local path = "eXplo1t'sCONFIG/" .. name .. ".json"
+    local success, content = pcall(function()
+        return readfile(path)
+    end)
+    if not success or not content then
+        self:Notify({Title = "Config Error", Text = "Failed to load " .. name, Duration = 3, Type = "Error"})
+        return
+    end
+    local success2, decoded = pcall(function()
+        return HttpService:JSONDecode(content)
+    end)
+    if not success2 or type(decoded) ~= "table" then return end
+    
+    for k, v in pairs(decoded) do
+        local val = v
+        if type(v) == "table" and v.Type == "Color3" then
+            val = Color3.new(v.R, v.G, v.B)
+        elseif type(v) == "table" and v.Type == "EnumItem" then
+            local split = string.split(v.Enum, ".")
+            if #split == 3 and Enum[split[2]] then
+                val = Enum[split[2]][split[3]]
+            end
+        end
+        if self.Flags[k] ~= nil then
+            self.Flags[k] = val
+            if self.Setters[k] then
+                self.Setters[k](val, true)
+            end
+        end
+    end
+    self:Notify({Title = "Config Loaded", Text = "Loaded Configuration: " .. name, Duration = 3, Type = "Success"})
+end
+
+return UI
