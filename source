@@ -200,7 +200,8 @@ function UI.new(options)
         TextColor3 = Theme.Text,
         TextSize = 16,
         Font = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Left
+        TextXAlignment = Enum.TextXAlignment.Left,
+        RichText = true
     })
     
     -- Window Controls
@@ -558,6 +559,23 @@ function UI:CreateTab(name, iconId)
     })
     Utility:Create("UICorner", {Parent = tab.Button, CornerRadius = UDim.new(0, 6)})
     
+    if iconId then
+        tab.Button.TextXAlignment = Enum.TextXAlignment.Left
+        Utility:Create("UIPadding", {
+            Parent = tab.Button,
+            PaddingLeft = UDim.new(0, 32)
+        })
+        tab.Icon = Utility:Create("ImageLabel", {
+            Parent = tab.Button,
+            Size = UDim2.new(0, 16, 0, 16),
+            Position = UDim2.new(0, -22, 0.5, 0),
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundTransparency = 1,
+            Image = string.find(iconId, "rbxassetid") and iconId or "rbxassetid://" .. iconId,
+            ImageColor3 = Theme.TextDark
+        })
+    end
+    
     local Indicator = Utility:Create("Frame", {
         Parent = tab.Button,
         Size = UDim2.new(0, 3, 0, 0),
@@ -606,12 +624,14 @@ function UI:CreateTab(name, iconId)
     tab.Button.MouseEnter:Connect(function()
         if self.CurrentTab ~= tab then
             Utility:Tween(tab.Button, {BackgroundColor3 = Theme.ElementHover, TextColor3 = Theme.Text})
+            if tab.Icon then Utility:Tween(tab.Icon, {ImageColor3 = Theme.Text}) end
         end
     end)
     
     tab.Button.MouseLeave:Connect(function()
         if self.CurrentTab ~= tab then
             Utility:Tween(tab.Button, {BackgroundColor3 = Theme.Sidebar, TextColor3 = Theme.TextDark})
+            if tab.Icon then Utility:Tween(tab.Icon, {ImageColor3 = Theme.TextDark}) end
         end
     end)
     
@@ -619,12 +639,14 @@ function UI:CreateTab(name, iconId)
         if self.CurrentTab then
             self.CurrentTab.Content.Visible = false
             Utility:Tween(self.CurrentTab.Button, {BackgroundColor3 = Theme.Sidebar, TextColor3 = Theme.TextDark})
+            if self.CurrentTab.Icon then Utility:Tween(self.CurrentTab.Icon, {ImageColor3 = Theme.TextDark}) end
             Utility:Tween(self.CurrentTab.Indicator, {Size = UDim2.new(0, 3, 0, 0)})
         end
         
         self.CurrentTab = tab
         tab.Content.Visible = true
         Utility:Tween(tab.Button, {BackgroundColor3 = Theme.ElementBg, TextColor3 = Theme.Accent})
+        if tab.Icon then Utility:Tween(tab.Icon, {ImageColor3 = Theme.Accent}) end
         Utility:Tween(Indicator, {Size = UDim2.new(0, 3, 0, 20)})
     end)
     
@@ -635,6 +657,7 @@ function UI:CreateTab(name, iconId)
         tab.Content.Visible = true
         tab.Button.BackgroundColor3 = Theme.ElementBg
         tab.Button.TextColor3 = Theme.Accent
+        if tab.Icon then tab.Icon.ImageColor3 = Theme.Accent end
         Indicator.Size = UDim2.new(0, 3, 0, 20)
     end
     
