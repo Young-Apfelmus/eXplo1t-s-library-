@@ -306,8 +306,12 @@ function UI.new(options)
         Size = UDim2.new(1, 0, 1, -65),
         Position = UDim2.new(0, 0, 0, 10),
         BackgroundTransparency = 1,
+        BorderSizePixel = 0,
         ScrollBarThickness = 2,
-        ScrollBarImageColor3 = Theme.Scrollbar
+        ScrollBarImageColor3 = Theme.Scrollbar,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        ClipsDescendants = true
     })
     
     Utility:Create("UIListLayout", {
@@ -569,8 +573,12 @@ function UI:CreateTab(name, iconId)
         Parent = self.Container,
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
+        BorderSizePixel = 0,
         ScrollBarThickness = 3,
         ScrollBarImageColor3 = Theme.Scrollbar,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        ClipsDescendants = true,
         Visible = false
     })
     
@@ -590,7 +598,8 @@ function UI:CreateTab(name, iconId)
     })
     
     ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        tab.Content.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 30)
+        -- With AutomaticCanvasSize, we just need to ensure the layout has proper padding at the bottom.
+        -- Setting CanvasSize manually here might fight with AutomaticSize, so we rely on the layout.
     end)
     
     -- Tab Selection Logic
