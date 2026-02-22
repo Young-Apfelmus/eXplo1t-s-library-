@@ -117,9 +117,20 @@ function UI.new(options)
         end
     end)
     
+    local guiName = self.Name .. "_eXplo1tUI"
+    local targetParent = CoreGui
+    if gethui then targetParent = gethui() end
+    
+    -- Single-Instance Check: Destroy older version of this exact script's UI
+    for _, child in pairs(targetParent:GetChildren()) do
+        if child.Name == guiName then
+            child:Destroy()
+        end
+    end
+    
     -- Main GUI
     self.ScreenGui = Utility:Create("ScreenGui", {
-        Name = HttpService:GenerateGUID(false),
+        Name = guiName,
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
         IgnoreGuiInset = true
