@@ -193,7 +193,7 @@ function UI.new(options)
     self.Title = Utility:Create("TextLabel", {
         Name = "Title",
         Parent = self.Topbar,
-        Size = UDim2.new(1, -30, 1, 0),
+        Size = UDim2.new(1, -90, 1, 0),
         Position = UDim2.new(0, 20, 0, 0),
         BackgroundTransparency = 1,
         Text = self.Name,
@@ -203,6 +203,35 @@ function UI.new(options)
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
+    -- Window Controls
+    local Controls = Utility:Create("Frame", {
+        Name = "Controls",
+        Parent = self.Topbar,
+        Size = UDim2.new(0, 60, 1, 0),
+        Position = UDim2.new(1, -70, 0, 0),
+        BackgroundTransparency = 1
+    })
+
+    local CloseBtn = Utility:Create("ImageButton", {
+        Name = "Close",
+        Parent = Controls,
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(1, -20, 0.5, -10),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://73694033334407",
+        ImageColor3 = Theme.TextDark
+    })
+    
+    local MinimizeBtn = Utility:Create("ImageButton", {
+        Name = "Minimize",
+        Parent = Controls,
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(1, -50, 0.5, -10),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://112894289355141",
+        ImageColor3 = Theme.TextDark
+    })
+
     -- Accent Line
     Utility:Create("Frame", {
         Name = "AccentLine",
@@ -213,6 +242,27 @@ function UI.new(options)
         BorderSizePixel = 0
     })
     
+    local isMinimized = false
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            Utility:Tween(self.MainFrame, {Size = UDim2.new(0, self.Size.X.Offset, 0, 45)}, 0.3)
+            MinimizeBtn.ImageColor3 = Theme.Accent
+        else
+            Utility:Tween(self.MainFrame, {Size = self.Size}, 0.3)
+            MinimizeBtn.ImageColor3 = Theme.TextDark
+        end
+    end)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        self.ScreenGui.Enabled = false
+    end)
+
+    CloseBtn.MouseEnter:Connect(function() Utility:Tween(CloseBtn, {ImageColor3 = Color3.fromRGB(240, 70, 70)}, 0.2) end)
+    CloseBtn.MouseLeave:Connect(function() Utility:Tween(CloseBtn, {ImageColor3 = Theme.TextDark}, 0.2) end)
+    MinimizeBtn.MouseEnter:Connect(function() if not isMinimized then Utility:Tween(MinimizeBtn, {ImageColor3 = Theme.Text}, 0.2) end end)
+    MinimizeBtn.MouseLeave:Connect(function() if not isMinimized then Utility:Tween(MinimizeBtn, {ImageColor3 = Theme.TextDark}, 0.2) end end)
+
     Utility:MakeDraggable(self.Topbar, self.MainFrame)
     
     -- Sidebar
