@@ -182,7 +182,7 @@ function UI.new(options)
     })
     
     Utility:Create("UICorner", {Parent = self.Topbar, CornerRadius = UDim.new(0, 8)})
-    Utility:Create("Frame", {
+    local TopbarBottom = Utility:Create("Frame", {
         Parent = self.Topbar,
         Size = UDim2.new(1, 0, 0, 8),
         Position = UDim2.new(0, 0, 1, -8),
@@ -233,7 +233,7 @@ function UI.new(options)
     })
 
     -- Accent Line
-    Utility:Create("Frame", {
+    local AccentLine = Utility:Create("Frame", {
         Name = "AccentLine",
         Parent = self.Topbar,
         Size = UDim2.new(1, 0, 0, 2),
@@ -246,10 +246,14 @@ function UI.new(options)
     MinimizeBtn.MouseButton1Click:Connect(function()
         isMinimized = not isMinimized
         if isMinimized then
-            Utility:Tween(self.MainFrame, {Size = UDim2.new(0, self.Size.X.Offset, 0, 45)}, 0.3)
+            TopbarBottom.Visible = false
+            AccentLine.Visible = false
+            Utility:Tween(self.MainFrame, {Size = UDim2.new(0, self.Size.X.Offset, 0, 45)}, 0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
             MinimizeBtn.ImageColor3 = Theme.Accent
         else
-            Utility:Tween(self.MainFrame, {Size = self.Size}, 0.3)
+            TopbarBottom.Visible = true
+            AccentLine.Visible = true
+            Utility:Tween(self.MainFrame, {Size = self.Size}, 0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
             MinimizeBtn.ImageColor3 = Theme.TextDark
         end
     end)
@@ -372,12 +376,15 @@ function UI.new(options)
     
     local function ToggleUI()
         uiHidden = not uiHidden
+        local targetSize = isMinimized and UDim2.new(0, self.Size.X.Offset, 0, 45) or self.Size
         if not uiHidden then
             self.MainFrame.Visible = true
-            Utility:Tween(self.MainFrame, {Size = self.Size, Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+            Utility:Tween(self.MainFrame, {Size = targetSize, Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
         else
-            local t = Utility:Tween(self.MainFrame, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 20)}, 0.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.In)
-            task.delay(0.4, function()
+            -- Clean vertical collapse animation
+            local hideSize = UDim2.new(0, self.Size.X.Offset, 0, 0)
+            Utility:Tween(self.MainFrame, {Size = hideSize, Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+            task.delay(0.5, function()
                 if uiHidden then
                     self.MainFrame.Visible = false
                 end
