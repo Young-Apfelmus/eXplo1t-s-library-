@@ -254,10 +254,6 @@ function UI.new(options)
         end
     end)
 
-    CloseBtn.MouseButton1Click:Connect(function()
-        self.ScreenGui.Enabled = false
-    end)
-
     CloseBtn.MouseEnter:Connect(function() Utility:Tween(CloseBtn, {ImageColor3 = Color3.fromRGB(240, 70, 70)}, 0.2) end)
     CloseBtn.MouseLeave:Connect(function() Utility:Tween(CloseBtn, {ImageColor3 = Theme.TextDark}, 0.2) end)
     MinimizeBtn.MouseEnter:Connect(function() if not isMinimized then Utility:Tween(MinimizeBtn, {ImageColor3 = Theme.Text}, 0.2) end end)
@@ -265,14 +261,14 @@ function UI.new(options)
 
     Utility:MakeDraggable(self.Topbar, self.MainFrame)
     
-    -- Sidebar
     self.Sidebar = Utility:Create("Frame", {
         Name = "Sidebar",
         Parent = self.MainFrame,
         Size = UDim2.new(0, 150, 1, -45),
         Position = UDim2.new(0, 0, 0, 45),
         BackgroundColor3 = Theme.Sidebar,
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        ClipsDescendants = true
     })
     
     Utility:Create("UICorner", {Parent = self.Sidebar, CornerRadius = UDim.new(0, 8)})
@@ -317,13 +313,12 @@ function UI.new(options)
         HorizontalAlignment = Enum.HorizontalAlignment.Center
     })
 
-    -- Player Info (Bottom Left)
     self.UserInfo = Utility:Create("Frame", {
         Name = "UserInfo",
         Parent = self.Sidebar,
         Size = UDim2.new(1, 0, 0, 45),
         Position = UDim2.new(0, 0, 1, -45),
-        BackgroundColor3 = Theme.Sidebar,
+        BackgroundTransparency = 1,
         BorderSizePixel = 0
     })
     
@@ -392,6 +387,12 @@ function UI.new(options)
     
     UserInputService.InputBegan:Connect(function(input, processed)
         if not processed and (input.KeyCode == Enum.KeyCode.RightShift or input.KeyCode == Enum.KeyCode.Insert) then
+            ToggleUI()
+        end
+    end)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        if not uiHidden then
             ToggleUI()
         end
     end)
